@@ -25,15 +25,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Build image
-        with:
-          # relative path to the place where source code with Dockerfile is located
-          context: ./
-          # Note: tags has to be all lower-case
-          tags: |
-            twelsby/searx:latest
-          # build on feature branches, push only on master branch
-          load: true
-          run: /usr/bin/docker buildx build --tag ${{tags}} ${{context}}
+        run: /usr/bin/docker buildx build --tag twelsby/searx:latest ./
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
