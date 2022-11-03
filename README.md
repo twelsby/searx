@@ -1,3 +1,5 @@
+[![Build and Publish](https://github.com/twelsby/searx/actions/workflows/build.yaml/badge.svg)](https://github.com/twelsby/searx/actions/workflows/build.yaml)
+
 # SearXNG
 
 builds custom SearXNG container with a changed simple theme, settings.yml and bundled with filtron binary; This project builds on top of https://github.com/searxng/searxng (SearXNG vs SearX: https://github.com/searxng/searxng/issues/46) as well as https://github.com/dalf/filtron.
