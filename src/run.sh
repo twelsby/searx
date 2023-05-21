@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # enable built in image proxy
 if [ ! -z "${IMAGE_PROXY}" ]; then
@@ -6,18 +6,34 @@ if [ ! -z "${IMAGE_PROXY}" ]; then
     searx/settings.yml;
 fi
 
-# morty config based on morty_key and and morty_url
-if [ ! -z "${MORTY_KEY}" ] && [ ! -z "${MORTY_URL}" ]; then
-    sed -i -e "s/# result_proxy:/result_proxy:/g" \
-    -e "s+#   url: http://127.0.0.1:3000/+  url : ${MORTY_URL}+g" \
-    -e "s/#   key: !!binary \"your_morty_proxy_key\"/  key : !!binary \"${MORTY_KEY}\"/g" \
-    -e "s/#   proxify_results: true/  proxify_results: false/g" \
+# proxy config based on PROXY env var
+if [ ! -z "${PROXY}" ]; then
+    sed -i -e "s/  #  proxies:/  proxies:/g" \
+    -e "s+  #    all://:+    all://:+g" \
     searx/settings.yml;
+    proxies=($(echo ${PROXY} | tr ',' ' '))
+    for i in "${proxies[@]}"
+    do
+        sed -i -e "s+    all://:+    all://:\n      - ${i}+g" \
+        searx/settings.yml;
+    done
+fi
+
+# set UWSGI_WORKERS from env
+if [ ! -z "${UWSGI_WORKERS}" ]; then
+sed -i -e "s|workers = .*|workers = ${UWSGI_WORKERS}|g" \
+/etc/uwsgi/uwsgi.ini
+fi
+
+# set UWSGI_THREADS from env
+if [ ! -z "${UWSGI_THREADS}" ]; then
+sed -i -e "s|threads = .*|threads = ${UWSGI_THREADS}|g" \
+/etc/uwsgi/uwsgi.ini
 fi
 
 # set redis if REDIS_URL contains URL
 if [ ! -z "${REDIS_URL}" ]; then
-    sed -i -e "s+url: unix:///usr/local/searxng-redis/run/redis.sock?db=0+url: ${REDIS_URL}+g" \
+    sed -i -e "s+  url: false+  url: ${REDIS_URL}+g" \
     searx/settings.yml;
 fi
 
@@ -36,6 +52,12 @@ fi
 # set instance name
 if [ ! -z "${NAME}" ]; then
     sed -i -e "/instance_name:/s/SearXNG/${NAME}/g" \
+    searx/settings.yml;
+fi
+
+# set privacy policy url
+if [ ! -z "${PRIVACYPOLICY}" ]; then
+    sed -i -e "s+privacypolicy_url: false+privacypolicy_url: ${PRIVACYPOLICY}+g" \
     searx/settings.yml;
 fi
 
@@ -68,13 +90,5 @@ fi
 sed -i -e "s/ultrasecretkey/$(openssl rand -hex 16)/g" \
 searx/settings.yml
 
-# unset variables in running container
-unset MORTY_KEY
-
-# start filtron in front of searxng or just searxng
-if [ ! -z "${FILTRON}" ]; then
-    exec uwsgi --master --http-socket "127.0.0.1:3000" "/etc/uwsgi/uwsgi.ini" &
-    exec filtron --rules /etc/filtron/rules.json -listen 0.0.0.0:8080 -api 0.0.0.0:4041 -target 127.0.0.1:3000
-else
-    exec uwsgi --master --http-socket "0.0.0.0:8080" "/etc/uwsgi/uwsgi.ini"
-fi
+# start uwsgi with SearXNG workload
+exec uwsgi --master --http-socket "0.0.0.0:8080" "/etc/uwsgi/uwsgi.ini"
