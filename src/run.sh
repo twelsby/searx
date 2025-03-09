@@ -19,18 +19,6 @@ if [ ! -z "${PROXY}" ]; then
     done
 fi
 
-# set UWSGI_WORKERS from env
-if [ ! -z "${UWSGI_WORKERS}" ]; then
-sed -i -e "s|workers = .*|workers = ${UWSGI_WORKERS}|g" \
-/etc/uwsgi/uwsgi.ini
-fi
-
-# set UWSGI_THREADS from env
-if [ ! -z "${UWSGI_THREADS}" ]; then
-sed -i -e "s|threads = .*|threads = ${UWSGI_THREADS}|g" \
-/etc/uwsgi/uwsgi.ini
-fi
-
 # set redis if REDIS_URL contains URL
 if [ ! -z "${REDIS_URL}" ]; then
     sed -i -e "s+  url: false+  url: ${REDIS_URL}+g" \
@@ -86,9 +74,33 @@ if [ ! -z "${GIT_BRANCH}" ]; then
     searx/version_frozen.py; \
 fi
 
+# set default search lang
+if [ ! -z "${SEARCH_DEFAULT_LANG}" ]; then
+    sed -i -e "s+default_lang: \"auto\"+default_lang: \"${SEARCH_DEFAULT_LANG}\"+g" \
+    searx/settings.yml;
+fi
+
+# set engine suspension timeout if a SearxEngineAccessDenied exception occours
+if [ ! -z "${SEARCH_ENGINE_ACCESS_DENIED}" ]; then
+    sed -i -e "/    SearxEngineAccessDenied/s/86400/${SEARCH_ENGINE_ACCESS_DENIED}/g" \
+    searx/settings.yml;
+fi
+
+# set instance as public instance to enable some features that are only needed for public instances
+if [ ! -z "${PUBLIC_INSTANCE}" ]; then
+    sed -i -e "/public_instance:/s/false/true/g" \
+    searx/settings.yml;
+fi
+
+# enable /metrics if METRICS_PASSWORD is set
+if [ ! -z "${METRICS_PASSWORD}" ]; then
+    sed -i -e "s|open_metrics: ''|open_metrics: '${METRICS_PASSWORD}'|g" \
+    searx/settings.yml;
+fi
+
 # auto gen random key for every unique container
 sed -i -e "s/ultrasecretkey/$(openssl rand -hex 16)/g" \
 searx/settings.yml
 
 # start uwsgi with SearXNG workload
-exec uwsgi --master --http-socket "0.0.0.0:8080" "/etc/uwsgi/uwsgi.ini"
+exec uwsgi --master --uid searxng --gid searxng --http-socket "0.0.0.0:8080" "/etc/uwsgi/uwsgi.ini"

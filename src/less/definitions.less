@@ -35,7 +35,7 @@
   /// Search Input Colors
   --color-search-border: #ebebeb;
   --color-search-shadow: 0 2px 5px 1px rgba(64, 60, 67, 0.16);
-  --color-search-shadow-hover: 0 2px 8px 1px rgba(64, 60, 67, 0.24);
+  --color-search-shadow-hover: 0 9px 8px -3px rgba(64, 60, 67, 0.24), 8px 0 8px -7px rgba(64, 60, 67, 0.24), -8px 0 8px -7px rgba(64, 60, 67, 0.24);
   --color-search-background: #fff;
   --color-search-font: #000;
   --color-search-background-hover: #1a73e8;
@@ -52,7 +52,7 @@
   /// Autocomplete Colors
   --color-autocomplete-font: #000;
   --color-autocomplete-border: transparent;
-  --color-autocomplete-shadow: 0 2px 8px 1px rgba(64, 60, 67, 0.24);
+  --color-autocomplete-shadow: 0 9px 8px -3px rgba(64, 60, 67, 0.24), 8px 0 8px -7px rgba(64, 60, 67, 0.24), -8px 0 8px -7px rgba(64, 60, 67, 0.24);
   --color-autocomplete-background: #fff;
   --color-autocomplete-background-hover: #f2f2f2;
   /// Answer Colors
@@ -80,7 +80,7 @@
   /// Settings Colors
   --color-settings-tr-hover: #f2f2f2;
   --color-settings-engine-description-font: #909090;
-  --color-settings-engine-group-background: #f2f2f2;
+  --color-settings-table-group-background: #f2f2f2;
   /// Detail modal
   --color-result-detail-font: #fff;
   --color-result-detail-label-font: lightgray;
@@ -117,6 +117,17 @@
   --color-toolkit-loader-borderleft: rgba(255, 255, 255, 0);
   --color-doc-code: #fff;
   --color-doc-code-background: #1a73e8;
+  /// Other misc colors
+  --color-bar-chart-primary: #1a73e8;
+  --color-bar-chart-secondary: #dbba34;
+  --color-image-resolution-background: rgba(0, 0, 0, 50%);
+  --color-image-resolution-font: #fff;
+  --color-loading-indicator: rgba(255, 255, 255, 0.2);
+  --color-loading-indicator-gap: #fff;
+  --color-line-number: #1a73e8;
+  // Favicons Colors
+  --color-favicon-background-color: #f1f3f4;
+  --color-favicon-border-color: #dadce0;
 }
 
 .dark-themes() {
@@ -149,7 +160,7 @@
   /// Search Input Colors
   --color-search-border: transparent;
   --color-search-shadow: 0 1px 3px rgba(23, 23, 23, 0.24);
-  --color-search-shadow-hover: 0 4px 12px rgba(23, 23, 23, 0.9);
+  --color-search-shadow-hover: 0 4px 6px 0 #171717;
   --color-search-background: #303134;
   --color-search-font: #fff;
   --color-search-background-hover: #8ab4f8;
@@ -166,7 +177,7 @@
   /// Autocomplete Colors
   --color-autocomplete-font: #fff;
   --color-autocomplete-border: transparent;
-  --color-autocomplete-shadow: 0 4px 12px rgba(23, 23, 23, 0.9);
+  --color-autocomplete-shadow: 0 4px 6px 0 #171717;
   --color-autocomplete-background: #303134;
   --color-autocomplete-background-hover: #171717;
   /// Answer Colors
@@ -201,7 +212,7 @@
   /// Settings Colors
   --color-settings-tr-hover: #3c4043;
   --color-settings-engine-description-font: #bdc1c6;
-  --color-settings-engine-group-background: #171717;
+  --color-settings-table-group-background: #171717;
   /// Toolkit Colors
   --color-toolkit-badge-font: #202124;
   --color-toolkit-badge-background: #bdc1c6;
@@ -230,6 +241,17 @@
   --color-toolkit-loader-borderleft: rgba(255, 255, 255, 0);
   --color-doc-code: #202124;
   --color-doc-code-background: #8ab4f8;
+  // Favicons Colors
+  --color-favicon-background-color: #fff;
+  --color-favicon-border-color: #9aa0a6;
+}
+
+.black-themes() {
+  --color-base-background: #000;
+  --color-base-background-mobile: #000;
+  --color-header-background: #000;
+  --color-footer-background: #000;
+  --color-sidebar-background: #000;
 }
 
 /// Dark Theme (autoswitch based on device pref)
@@ -244,6 +266,11 @@
   .dark-themes();
 }
 
+:root.theme-black {
+  .dark-themes();
+  .black-themes();
+}
+
 /// General Size
 @results-width: 45rem;
 @results-sidebar-width: 25rem;
@@ -252,8 +279,8 @@
 @results-gap: 5rem;
 @results-margin: 0.125rem;
 @result-padding: 1rem;
-@results-image-row-height: 12rem;
-@results-image-row-height-phone: 6rem;
+@results-image-row-height: 16rem;
+@results-image-row-height-phone: 10rem;
 @search-width: 46rem;
 // heigh of #search, see detail.less
 @search-height: 8.7rem;
@@ -272,16 +299,17 @@
 .autocomplete {
   &.open {
     margin-top: 4rem !important;
+    box-shadow: var(--color-autocomplete-shadow);
   }
 }
 
 /// Load fonts from this directory.
-@icon-font-path:          "../../../fonts/";
+@icon-font-path: "../../../fonts/";
 //** File name for all font files.
-@icon-font-name:          "glyphicons-halflings-regular";
+@icon-font-name: "glyphicons-halflings-regular";
 //** Element ID within SVG icon file.
-@icon-font-svg-id:        "glyphicons_halflingsregular";
+@icon-font-svg-id: "glyphicons_halflingsregular";
 
 // decoration of the select HTML elements
-@select-light-svg-path:   "../svg/select-light.svg";
-@select-dark-svg-path:    "../svg/select-dark.svg";
+@select-light-svg-path: "../svg/select-light.svg";
+@select-dark-svg-path: "../svg/select-dark.svg";

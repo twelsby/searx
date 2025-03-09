@@ -1,18 +1,21 @@
-version: '3.7'
-
 services:
   redis:
-    image: redis:alpine
+    image: cgr.dev/chainguard/valkey:latest
     restart: always
-    command: redis-server --save "" --appendonly "no"
-    tmpfs:
-      - /var/lib/redis
+    command: --save 60 1 --loglevel warning
+    volumes:
+      - valkey-data:/data
     cap_drop:
       - ALL
     cap_add:
       - SETGID
       - SETUID
       - DAC_OVERRIDE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
 
   searxng:
     image: paulgoio/searxng:{ENV}
@@ -22,6 +25,8 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
+    volumes:
+      - favicon-cache:/var/cache/searxng
     networks:
       - default
       - proxy
@@ -32,7 +37,9 @@ services:
       - SETUID
       - DAC_OVERRIDE
     environment:
+      - PUBLIC_INSTANCE=true
       - LIMITER=true
+      - METRICS_PASSWORD={KEY1}
       - REDIS_URL=redis://redis:6379/0
       - IMAGE_PROXY=true
       - PROXY={URL1}
@@ -40,11 +47,12 @@ services:
       - UWSGI_THREADS=4
       - BASE_URL=https://{DOMAIN}/
       - NAME=PaulGO
-      - CONTACT=https://about.paulgo.io/#about
+      - CONTACT=https://mrpaulblack.paulgo.page
+      - SEARCH_DEFAULT_LANG=en-US
+      - SEARCH_ENGINE_ACCESS_DENIED=60
     labels:
       - traefik.enable=true
-      - traefik.http.routers.{REPO}.rule=Host(`{DOMAIN}`)&&Method(`GET`,`POST`,`HEAD`)
-      - traefik.http.routers.{REPO}.entrypoints=https
+      - traefik.http.routers.{REPO}.rule=Host(`{DOMAIN}`)&&(Method(`GET`)||Method(`POST`)||Method(`HEAD`))
       - traefik.http.routers.{REPO}.tls=true
       - traefik.http.routers.{REPO}.middlewares=external-secure,searx-csp@file,{REPO}-headers
       # CSP for SearXNG in dynamic config
@@ -54,3 +62,7 @@ services:
 networks:
   proxy:
     external: true
+
+volumes:
+  valkey-data:
+  favicon-cache:
